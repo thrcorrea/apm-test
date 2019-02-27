@@ -1,33 +1,13 @@
 process.env.ELASTIC_APM_LOG_LEVEL = 'trace';
 
 const apm = require('elastic-apm-node').start({
-  serviceName: 'servico',
+  serviceName: 'service',
 });
 /* Dependencies */
 const express = require('express');
 
-config = {
-  client: 'mysql2',
-  debug: false,
-  connection: {
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'seedProject',
-    supportBigNumbers: true,
-    bigNumberStrings: true,
-    multipleStatements: true,
-    timezone: 'UTC',
-    dateStrings: true,
-  },
-  pool: {
-    min: parseInt(process.env.DB_POOL_MIN || 0, 10),
-    max: parseInt(process.env.DB_POOL_MAX || 1, 10),
-  },
-};
-
 // main connections
-const knex = require('knex')(config);
+const { knex } = require('./config/db');
 
 /* Routes */
 
@@ -42,11 +22,9 @@ const app = express();
 /* Log express request and response */
 
 /* Status endpoint */
-app.get('/status', function status(req, res) {
-  knex.raw('SELECT 1')
-    .then((result) => {
-      res.sendStatus(204);
-    })
+app.get('/status', async function status(req, res) {
+  await knex.raw('SELECT 1');
+  res.sendStatus(204);
 });
 
 /* Instatiate routes */
